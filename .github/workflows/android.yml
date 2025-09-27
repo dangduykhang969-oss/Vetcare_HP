@@ -29,11 +29,7 @@ jobs:
         run: flutter --version
 
       # Tạo android/ nếu chưa có và ép tên dự án hợp lệ
-      - name: Ensure android project exists (force valid name)
-        run: |
-          if [ ! -d "android" ]; then
-            flutter create --project-name vetcare_postop .
-          fi
+
 
       - name: Get dependencies
         run: flutter pub get
