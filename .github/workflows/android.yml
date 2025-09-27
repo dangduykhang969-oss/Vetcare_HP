@@ -8,39 +8,32 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java (Temurin 17)
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      - name: Set up Flutter
+      - name: Set up Flutter (stable)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          flutter-version: 3.24.0
+          channel: stable
           cache: true
 
       - name: Flutter version
         run: flutter --version
 
+      # Tạo android/ nếu chưa có và ép tên dự án hợp lệ
       - name: Ensure android project exists (force valid name)
-  run: |
-    if [ ! -d "android" ]; then
-      flutter create --project-name vetcare_postop .
-    fi
-
-      - name: Patch AndroidManifest
         run: |
-          MANIFEST="android/app/src/main/AndroidManifest.xml"
-          grep -q POST_NOTIFICATIONS "$MANIFEST" || \
-          sed -i '/<application /i\  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>' "$MANIFEST"
-          sed -i 's/android:label="[^"]*"/android:label="VetCare Post-Op"/' "$MANIFEST" || true
+          if [ ! -d "android" ]; then
+            flutter create --project-name vetcare_postop .
+          fi
 
       - name: Get dependencies
         run: flutter pub get
