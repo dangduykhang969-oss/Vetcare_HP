@@ -29,8 +29,11 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
-      - name: Ensure android project exists
-        run: flutter create .
+      - name: Ensure android project exists (force valid name)
+  run: |
+    if [ ! -d "android" ]; then
+      flutter create --project-name vetcare_postop .
+    fi
 
       - name: Patch AndroidManifest
         run: |
