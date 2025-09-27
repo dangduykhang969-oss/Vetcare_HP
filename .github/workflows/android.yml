@@ -1,0 +1,52 @@
+name: Build APK (VetCare Post-Op)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Ensure android project exists
+        run: flutter create .
+
+      - name: Patch AndroidManifest
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          grep -q POST_NOTIFICATIONS "$MANIFEST" || \
+          sed -i '/<application /i\  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>' "$MANIFEST"
+          sed -i 's/android:label="[^"]*"/android:label="VetCare Post-Op"/' "$MANIFEST" || true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vetcare-postop-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
